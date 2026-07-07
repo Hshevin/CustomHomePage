@@ -1,0 +1,78 @@
+---
+const { frontmatter } = Astro.props;
+---
+
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{frontmatter.title} - empathless</title>
+  </head>
+
+  <body>
+    <main>
+      <nav>
+        <a href="/">empathless</a>
+      </nav>
+
+      <article>
+        <header>
+          <p>{frontmatter.date}</p>
+          <h1>{frontmatter.title}</h1>
+        </header>
+
+        <slot />
+      </article>
+    </main>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    background: #f7f5f0;
+    color: #222;
+    font-family: ui-serif, Georgia, "Times New Roman", "Noto Serif SC", serif;
+    line-height: 1.9;
+  }
+
+  main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 64px 24px 96px;
+  }
+
+  nav {
+    margin-bottom: 80px;
+  }
+
+  nav a {
+    color: #555;
+    text-decoration: none;
+  }
+
+  article header {
+    margin-bottom: 48px;
+  }
+
+  h1 {
+    margin: 8px 0 0;
+    font-size: 28px;
+    font-weight: 400;
+  }
+
+  article header p {
+    margin: 0;
+    color: #777;
+  }
+
+  article :global(p) {
+    margin: 18px 0;
+  }
+
+  article :global(a) {
+    color: #222;
+    text-underline-offset: 4px;
+  }
+</style>

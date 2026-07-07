@@ -1,49 +1,539 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
-import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { Image } from "astro:assets";
+import { getCollection, render } from "astro:content";
+import type { MarkdownInstance } from "astro";
+import WorkspaceImage from "../assets/empathless-workspace.png";
+
+type DiaryFrontmatter = {
+  title?: string | null;
+  date?: string | null;
+};
+
+const homeEntries = (await getCollection("home")).sort((a, b) => a.data.order - b.data.order);
+
+const findSection = (section: string) => homeEntries.find((entry) => entry.data.section === section);
+const filterSection = (section: string) =>
+  homeEntries.filter((entry) => entry.data.section === section);
+
+const profileEntry = findSection("profile");
+const aboutEntry = findSection("about");
+const skillsEntry = findSection("skills");
+const contactEntry = findSection("contact");
+const projects = filterSection("project");
+const timeline = filterSection("timeline");
+const { Content: ProfileIntro } = profileEntry ? await render(profileEntry) : { Content: undefined };
+const { Content: AboutContent } = aboutEntry ? await render(aboutEntry) : { Content: undefined };
+
+const profile = {
+  name: profileEntry?.data.name ?? "empathless",
+  role: profileEntry?.data.role ?? "开发者",
+  status: profileEntry?.data.status ?? "正在整理个人项目、文章和一些小成果。",
+};
+
+const skills = skillsEntry?.data.items?.map((item) => item.value) ?? [];
+const contacts = contactEntry?.data.items ?? [];
+
+const diaryPosts = Object.values(
+  import.meta.glob<MarkdownInstance<DiaryFrontmatter>>("./diary/*.md", {
+    eager: true,
+  }),
+).sort((a, b) => (b.frontmatter.date ?? "").localeCompare(a.frontmatter.date ?? ""));
 ---
 
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header />
-		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
-		</main>
-		<Footer />
-	</body>
+<html lang="zh-CN" id="top">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta
+      name="description"
+      content="empathless 的个人主页，展示个人简介、技能兴趣、项目成果、文章记录与联系方式。"
+    />
+    <title>empathless | 开发者</title>
+  </head>
+  <body>
+    <header class="site-header" aria-label="站点导航">
+      <a class="brand" href="#top" aria-label="回到首页">empathless</a>
+      <nav>
+        <a href="#work">成果</a>
+        <a href="#timeline">经历</a>
+        <a href="#contact">联系</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">{profile.role}</p>
+          <h1 id="hero-title">{profile.name}</h1>
+          <p class="lead">{profile.status}</p>
+          <div class="intro">
+            {ProfileIntro ? <ProfileIntro /> : <p>个人简介待补充。</p>}
+          </div>
+          <div class="hero-actions" aria-label="主要操作">
+            <a href="#work">查看成果</a>
+            <a href="#contact">更新联系信息</a>
+          </div>
+        </div>
+        <figure class="hero-visual">
+          <Image
+            src={WorkspaceImage}
+            alt="极简开发者工作台视觉占位图"
+            loading="eager"
+            widths={[640, 960, 1280]}
+            sizes="(max-width: 860px) 100vw, 42vw"
+          />
+        </figure>
+      </section>
+
+      <section class="section two-column" aria-labelledby="about-title">
+        <div>
+          <p class="section-kicker">{aboutEntry?.data.kicker ?? "About"}</p>
+          <h2 id="about-title">{aboutEntry?.data.title ?? "一个持续维护的个人索引"}</h2>
+        </div>
+        <div class="section-body">
+          {AboutContent ? <AboutContent /> : <p>关于我的内容待补充。</p>}
+          {
+            skills.length > 0 && (
+              <ul class="skill-list" aria-label="技能和兴趣">
+                {skills.map((skill) => (
+                  <li>{skill}</li>
+                ))}
+              </ul>
+            )
+          }
+        </div>
+      </section>
+
+      <section class="section" id="work" aria-labelledby="work-title">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Work</p>
+            <h2 id="work-title">项目与小成果</h2>
+          </div>
+          <a href="/blog">查看文章</a>
+        </div>
+        <div class="project-grid">
+          {
+            projects.map((project) => (
+              <article class="project-card">
+                <p>{project.data.type}</p>
+                <h3>
+                  <a href={project.data.href ?? "#contact"}>{project.data.title}</a>
+                </h3>
+                <span>{project.data.description}</span>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="section split-list" aria-labelledby="recent-title">
+        <div>
+          <p class="section-kicker">Notes</p>
+          <h2 id="recent-title">最近记录</h2>
+        </div>
+        <ul class="recent-list">
+          {
+            diaryPosts.length > 0 ? (
+              diaryPosts.slice(0, 4).map((post) => (
+                <li>
+                  <time datetime={post.frontmatter.date ?? undefined}>
+                    {post.frontmatter.date || "日期待补充"}
+                  </time>
+                  <a href={post.url}>{post.frontmatter.title || "标题待补充"}</a>
+                </li>
+              ))
+            ) : (
+              <li>
+                <span>暂无记录</span>
+                <span>添加 Markdown 到 src/pages/diary 后会显示在这里。</span>
+              </li>
+            )
+          }
+        </ul>
+      </section>
+
+      <section class="section split-list" id="timeline" aria-labelledby="timeline-title">
+        <div>
+          <p class="section-kicker">Timeline</p>
+          <h2 id="timeline-title">经历时间线</h2>
+        </div>
+        <ol class="timeline">
+          {
+            timeline.map((item) => (
+              <li>
+                <time>{item.data.time}</time>
+                <div>
+                  <h3>{item.data.title}</h3>
+                  <p>{item.data.description}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <section class="contact-band" id="contact" aria-labelledby="contact-title">
+        <div>
+          <p class="section-kicker">{contactEntry?.data.kicker ?? "Contact"}</p>
+          <h2 id="contact-title">{contactEntry?.data.title ?? "保持一个可更新的入口"}</h2>
+          <p>{contactEntry?.data.description ?? "联系方式待补充。"}</p>
+        </div>
+        <ul class="contact-list">
+          {
+            contacts.map((contact) => (
+              <li>
+                <span>{contact.label}</span>
+                <a href={contact.href ?? "#top"}>{contact.value}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+    </main>
+  </body>
 </html>
+
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f7f4;
+    --paper: #ffffff;
+    --ink: #151716;
+    --muted: #626862;
+    --line: #dfe3dc;
+    --soft: #ecefeb;
+    --accent: #167c68;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family:
+      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      "Noto Sans SC", sans-serif;
+    line-height: 1.65;
+  }
+
+  a {
+    color: inherit;
+    text-decoration-color: color-mix(in srgb, var(--accent), transparent 45%);
+    text-underline-offset: 0.22em;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 18px clamp(20px, 4vw, 56px);
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg), transparent 8%);
+    backdrop-filter: blur(18px);
+  }
+
+  .brand {
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  nav {
+    display: flex;
+    gap: clamp(14px, 2.4vw, 28px);
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  nav a {
+    text-decoration: none;
+  }
+
+  main {
+    width: min(1120px, calc(100% - 40px));
+    margin: 0 auto;
+  }
+
+  .hero {
+    min-height: calc(100vh - 64px);
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+    align-items: center;
+    gap: clamp(32px, 5vw, 72px);
+    padding: clamp(48px, 7vw, 88px) 0;
+  }
+
+  .eyebrow,
+  .section-kicker {
+    margin: 0 0 12px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    margin-bottom: 18px;
+    font-size: clamp(48px, 8vw, 104px);
+    line-height: 0.95;
+    overflow-wrap: anywhere;
+  }
+
+  h2 {
+    margin-bottom: 0;
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 1.08;
+  }
+
+  h3 {
+    margin-bottom: 8px;
+    font-size: 20px;
+    line-height: 1.25;
+  }
+
+  .lead {
+    max-width: 720px;
+    margin-bottom: 18px;
+    font-size: clamp(22px, 3vw, 34px);
+    line-height: 1.25;
+  }
+
+  .intro,
+  .section-body p,
+  .contact-band p,
+  .timeline p {
+    color: var(--muted);
+  }
+
+  .intro {
+    max-width: 620px;
+    font-size: 18px;
+  }
+
+  .intro p {
+    margin-bottom: 0;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 34px;
+  }
+
+  .hero-actions a,
+  .section-heading > a {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    border-bottom: 1px solid var(--accent);
+    color: var(--ink);
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .hero-visual {
+    margin: 0;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+
+  .hero-visual img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  .section {
+    padding: clamp(56px, 8vw, 104px) 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .two-column,
+  .split-list,
+  .section-heading,
+  .contact-band {
+    display: grid;
+    grid-template-columns: minmax(220px, 0.72fr) minmax(0, 1.28fr);
+    gap: clamp(28px, 6vw, 72px);
+  }
+
+  .section-heading {
+    align-items: end;
+    margin-bottom: 28px;
+  }
+
+  .section-body {
+    max-width: 720px;
+  }
+
+  .skill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0;
+    margin: 28px 0 0;
+    list-style: none;
+  }
+
+  .skill-list li {
+    border: 1px solid var(--line);
+    background: var(--paper);
+    padding: 7px 10px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .project-card {
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    padding: 22px;
+  }
+
+  .project-card p {
+    margin-bottom: 24px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .project-card span {
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .recent-list,
+  .timeline,
+  .contact-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .recent-list li,
+  .timeline li,
+  .contact-list li {
+    display: grid;
+    grid-template-columns: 128px minmax(0, 1fr);
+    gap: 18px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  time,
+  .contact-list span,
+  .recent-list span:first-child {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .timeline h3 {
+    margin-bottom: 4px;
+  }
+
+  .timeline p {
+    margin-bottom: 0;
+  }
+
+  .contact-band {
+    align-items: start;
+    padding: clamp(40px, 6vw, 64px) 0 clamp(64px, 8vw, 112px);
+    border-top: 1px solid var(--line);
+  }
+
+  .contact-list {
+    border-top: 1px solid var(--line);
+  }
+
+  .contact-list li {
+    grid-template-columns: 110px minmax(0, 1fr);
+  }
+
+  .contact-list a {
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 860px) {
+    .site-header {
+      position: static;
+    }
+
+    .hero,
+    .two-column,
+    .split-list,
+    .section-heading,
+    .contact-band {
+      grid-template-columns: 1fr;
+    }
+
+    .hero {
+      min-height: auto;
+      padding-top: 44px;
+    }
+
+    .hero-visual {
+      aspect-ratio: 16 / 10;
+    }
+
+    .project-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .site-header {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 10px;
+      padding-inline: 20px;
+    }
+
+    main {
+      width: min(100% - 32px, 1120px);
+    }
+
+    .lead {
+      font-size: 22px;
+    }
+
+    .recent-list li,
+    .timeline li,
+    .contact-list li {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+  }
+</style>

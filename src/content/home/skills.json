@@ -1,0 +1,12 @@
+{
+  "section": "skills",
+  "order": 20,
+  "items": [
+    { "value": "Web 开发" },
+    { "value": "后端接口" },
+    { "value": "内容系统" },
+    { "value": "自动化工具" },
+    { "value": "产品原型" },
+    { "value": "写作整理" }
+  ]
+}
