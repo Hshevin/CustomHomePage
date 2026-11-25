@@ -1,5 +1,7 @@
 {
   "section": "contact",
   "order": 90,
-  "items": []
+  "items": [
+    { "label": "GitHub", "value": "github.com/Hshevin", "href": "https://github.com/Hshevin" }
+  ]
 }
