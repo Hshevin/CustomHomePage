@@ -1,78 +1,160 @@
 ---
+import SiteHeader from "../components/SiteHeader.astro";
+import { getDiaryPosts } from "../lib/diary";
+
+const diaryPosts = await getDiaryPosts();
+
 const { frontmatter } = Astro.props;
+
+const trim = (path: string) => path.replace(/\/+$/, "");
+const index = diaryPosts.findIndex((post) => trim(post.url) === trim(Astro.url.pathname));
+// 列表按日期从新到旧排，所以“较早一篇”在后面。
+const older = index >= 0 ? diaryPosts[index + 1] : undefined;
+const newer = index > 0 ? diaryPosts[index - 1] : undefined;
 ---
 
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>{frontmatter.title} - empathless</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{frontmatter.title} · empathless</title>
   </head>
 
   <body>
-    <main>
-      <nav>
-        <a href="/">empathless</a>
-      </nav>
+    <SiteHeader nav={[{ href: "/#notes", label: "全部记录" }]} />
 
+    <main class="wrap">
       <article>
         <header>
-          <p>{frontmatter.date}</p>
+          {frontmatter.date && <time>{frontmatter.date}</time>}
           <h1>{frontmatter.title}</h1>
         </header>
 
-        <slot />
+        <div class="body">
+          <slot />
+        </div>
       </article>
+
+      <nav class="pager" aria-label="翻页">
+        {
+          older ? (
+            <a href={older.url}>
+              <span>较早一篇</span>
+              {older.title}
+            </a>
+          ) : (
+            <a class="home" href="/">
+              回到首页
+            </a>
+          )
+        }
+        {
+          newer && (
+            <a class="next" href={newer.url}>
+              <span>较新一篇</span>
+              {newer.title}
+            </a>
+          )
+        }
+      </nav>
     </main>
   </body>
 </html>
 
 <style>
-  body {
-    margin: 0;
-    background: #f7f5f0;
-    color: #222;
-    font-family: ui-serif, Georgia, "Times New Roman", "Noto Serif SC", serif;
-    line-height: 1.9;
-  }
-
   main {
+    padding-bottom: clamp(64px, 10vw, 120px);
+  }
+
+  article {
     max-width: 680px;
-    margin: 0 auto;
-    padding: 64px 24px 96px;
+    margin: clamp(40px, 8vw, 96px) auto 0;
   }
 
-  nav {
-    margin-bottom: 80px;
+  header {
+    padding-bottom: 24px;
+    margin-bottom: 32px;
+    border-bottom: 2px solid var(--ink);
   }
 
-  nav a {
-    color: #555;
-    text-decoration: none;
-  }
-
-  article header {
-    margin-bottom: 48px;
+  time {
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
   }
 
   h1 {
     margin: 8px 0 0;
-    font-size: 28px;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  .body {
+    font-size: 17px;
+    line-height: 1.95;
+  }
+
+  .body :global(p) {
+    margin: 0 0 1.2em;
+  }
+
+  .body :global(a) {
+    color: var(--accent);
+    text-underline-offset: 4px;
+  }
+
+  .body :global(blockquote) {
+    margin: 1.5em 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--accent);
+    color: var(--muted);
+  }
+
+  .body :global(img) {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 680px;
+    margin: 64px auto 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+
+  .pager a {
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .pager a:hover {
+    color: var(--accent);
+  }
+
+  .pager span {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--faint);
+    font-size: 13px;
     font-weight: 400;
   }
 
-  article header p {
-    margin: 0;
-    color: #777;
+  .pager .home {
+    align-self: end;
   }
 
-  article :global(p) {
-    margin: 18px 0;
-  }
-
-  article :global(a) {
-    color: #222;
-    text-underline-offset: 4px;
+  .pager .next {
+    grid-column: 2;
+    text-align: right;
   }
 </style>
