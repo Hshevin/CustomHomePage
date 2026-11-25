@@ -1,0 +1,50 @@
+---
+import "../styles/site.css";
+
+type NavItem = { href: string; label: string };
+const { nav = [] } = Astro.props as { nav?: NavItem[] };
+---
+
+<header class="site-header wrap">
+	<a class="brand" href="/">empathless</a>
+	{
+		nav.length > 0 && (
+			<nav aria-label="站点导航">
+				{nav.map((item) => (
+					<a href={item.href}>{item.label}</a>
+				))}
+			</nav>
+		)
+	}
+</header>
+
+<style>
+	.site-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 24px;
+		padding: 24px 0;
+		font-size: 14px;
+	}
+
+	.brand {
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	nav {
+		display: flex;
+		gap: 24px;
+	}
+
+	nav a {
+		color: var(--muted);
+		text-decoration: none;
+	}
+
+	nav a:hover,
+	.brand:hover {
+		color: var(--accent);
+	}
+</style>

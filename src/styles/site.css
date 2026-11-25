@@ -1,0 +1,66 @@
+:root {
+	color-scheme: light;
+	--bg: #fafafa;
+	--ink: #111111;
+	--muted: #6b6b6b;
+	--faint: #9a9a9a;
+	--line: #dddddd;
+	--accent: #1f4fff;
+	--font:
+		"Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC",
+		"Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		color-scheme: dark;
+		--bg: #0e0f11;
+		--ink: #f1f1f1;
+		--muted: #a3a3a3;
+		--faint: #6f6f6f;
+		--line: #2a2c30;
+		--accent: #7b95ff;
+	}
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--ink);
+	font-family: var(--font);
+	line-height: 1.7;
+	-webkit-font-smoothing: antialiased;
+}
+
+a {
+	color: inherit;
+}
+
+a:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 3px;
+}
+
+.wrap {
+	width: min(1120px, calc(100% - 32px));
+	margin: 0 auto;
+}
+
+::selection {
+	background: var(--accent);
+	color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+}

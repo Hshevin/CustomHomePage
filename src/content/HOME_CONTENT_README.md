@@ -1,108 +1,91 @@
 # 首页内容修改说明
 
-首页内容放在 `src/content/home/`。页面会读取每个文件的 `section` 字段，把内容自动分到对应模块，再按 `order` 从小到大排序。
+首页内容放在 `src/content/home/`，日记放在 `src/pages/diary/`。
 
-## 基本规则
+页面按每个文件的 `section` 把内容分到对应模块，同类内容按 `order` 从小到大排。**某个模块没有内容时整块不显示**，导航和编号也会自动跳过它，所以不需要放占位文字。
 
-- `section` 决定内容显示在哪个模块。
-- `order` 决定同类内容的排序，数字越小越靠前。
-- Markdown 适合写带正文的内容，比如简介、项目、经历。
-- JSON 适合写列表数据，比如技能、联系方式。
-- 没有确认的真实经历、公司、学校或项目，不要写成确定事实，可以继续保留“待补充”。
+只写确认过的真实信息。
 
-## 修改首屏简介
+## 首屏与“关于”
 
 编辑 `src/content/home/profile.md`：
 
 ```md
 ---
 section: profile
-order: 0
 name: empathless
-role: 开发者
-status: 正在整理个人项目、文章和一些小成果。
+status: 名字下面那一句话。
 ---
 
-这里写首屏下面的个人简介。
+右侧“关于”的正文。
 ```
 
-## 修改关于我
+## 记录（日记）
 
-编辑 `src/content/home/about.md`。正文会显示在“一个持续维护的个人索引”这一块。
+在 `src/pages/diary/` 新建 Markdown（用 Obsidian 的日记模板即可，模板是 `_template.md`）：
 
-## 修改技能
+```md
+---
+layout: ../../layouts/DiaryLayout.astro
+title: 标题
+date: "2026.07.05"
+---
 
-编辑 `src/content/home/skills.json`，在 `items` 里增删：
-
-```json
-{
-  "section": "skills",
-  "order": 20,
-  "items": [
-    { "value": "Web 开发" },
-    { "value": "后端接口" }
-  ]
-}
+正文。
 ```
 
-## 新增项目或小成果
+- 首页按日期从新到旧列出所有记录；日记页底部可以翻到较早或较新的一篇。
+- 没写 `title` 的不会出现在列表里。
+- 文件名以下划线开头（如 `_template.md`）的不会生成页面。
 
-在 `src/content/home/projects/` 下新建一个 Markdown 文件，例如 `my-tool.md`：
+## 作品
+
+在 `src/content/home/projects/` 下新建 Markdown，例如 `my-tool.md`：
 
 ```md
 ---
 section: project
-order: 40
+order: 10
 title: 我的工具
 type: 工具 / 2026
 href: https://example.com
-description: 一句话说明它做了什么，以及你负责了什么。
+description: 一句话说明它做了什么。
 ---
 ```
 
-项目卡片现在使用元数据渲染。以后如果要展示更长正文，可以再扩展页面模板。
+## 经历
 
-## 新增经历
-
-在 `src/content/home/timeline/` 下新建一个 Markdown 文件，例如 `open-source.md`：
+在 `src/content/home/timeline/` 下新建 Markdown：
 
 ```md
 ---
 section: timeline
-order: 40
+order: 10
 time: 2026
 title: 经历标题
-description: 用真实、简短的一句话说明这段经历。
+description: 一句话说明。
 ---
 ```
 
-## 修改联系方式
+## 联系
 
-编辑 `src/content/home/contact.json`：
+编辑 `src/content/home/contact.json`，在 `items` 里加：
 
 ```json
 {
   "section": "contact",
   "order": 90,
-  "kicker": "Contact",
-  "title": "保持一个可更新的入口",
-  "description": "这里写联系方式区域的说明。",
   "items": [
-    {
-      "label": "Email",
-      "value": "me@example.com",
-      "href": "mailto:me@example.com"
-    }
+    { "label": "GitHub", "value": "github.com/yourname", "href": "https://github.com/yourname" },
+    { "label": "Email", "value": "me@example.com", "href": "mailto:me@example.com" }
   ]
 }
 ```
 
 ## 预览
 
-运行：
-
 ```bash
 astro dev --background
 ```
 
-打开 `http://localhost:4321`。如果服务已经在运行，保存内容文件后刷新页面即可。
+打开 `http://localhost:4321`，保存后刷新即可。
